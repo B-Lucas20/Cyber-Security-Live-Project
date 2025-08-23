@@ -28,9 +28,9 @@ For the offensive Stories I was tasked with exposing several different vulnerabi
 - [Accessing and Downloading Secured Secret Documents](#accessing-and-downloading-secured-secret-documents)
 
 ## Defensive Stories
-- Malware Traffic
-- Find the Culprit!
-- Erik's Coffee Shop
+- [Malware Traffic](#malware-traffic)
+- [Find the Culprit!](#find-the-culprit)
+- [Erik's Coffee Shop](#eriks-coffee-shop)
 
 ---
 
@@ -110,14 +110,84 @@ The double encoded null byte attack worked and I was able to successfully downlo
 
 ---
 
+### Malware Traffic
+
+For this defensive story, a friend's computer has been compromised and encrypted. Somewhere and sometime they downloaded ransomware and are asking us to help identify when and where the issues arose. They have provided PCAP files for analysis. 
+
+While sorting through the files, we were able to identify the IOC through a very unique and abnormal hostname. 
+
+<img width="800" height="336" alt="shockwaveHTTP" src="https://github.com/user-attachments/assets/48bcd9ae-8e7c-47c1-b171-2feb3b00bea3" />
+
+Inspecting the TCP path of that abnormal hostname revealed a Shockwave-flash object. There are several known vulnerabilites for this file type. The friend in this story has said that they clicked on a link that promised free movies.
+
+<img width="800" height="510" alt="groupprogram" src="https://github.com/user-attachments/assets/71dfa678-7326-454c-8e27-0fd907458f51" />
+
+Sorting the PCAP file cronologically, this first shockwave-flash object forced a redirect to a different IP address of 62.75.195.236. This new IP address contains the malware that infected the computer. Inspecting and following the TCP path for the host IP address 62.75.195.236 revealed a hidden executable file. 
+
+<img width="800" height="446" alt="ThisProgramCantDOS" src="https://github.com/user-attachments/assets/dcef3b83-afee-4e26-9c45-550508902802" />
+
+The malware was exported and checked on hybrid-analysis.com revealing that it is indeed a known executable malware with a SHA-256 of 532fld6b8faf6e54e3f6f9279e9720bf9f27257d2b75ce72e86ed3ca6578fafb
+
+<img width="800" height="393" alt="cantDOSransomware" src="https://github.com/user-attachments/assets/8ddeded5-521f-48a3-8995-d7c7321d3899" />
+
+Through further exploration of exported HTTP files, I was able to pull the ransomware's HTML. Using ChatGPT, I was able to clean up the HTML, implement some basic CSS, and run the ransomware website.
+
+<img width="800" height="534" alt="givememoney" src="https://github.com/user-attachments/assets/ea41e13b-7d3c-480a-96ac-60cac666d09c" />
+
+---
+
+### Find the Culprit!
+
+A machine has become infected. I was tasked with using the PCAP file provided to find information about the victim machine and figuring out where the root cause of the infection began.
+
+We can use wireshark to analyze the PCAP files and find information about the infected machine. A great way to gather information on the infected machine is to check for any DHCP requests. In the first image we are able to find the MAC and IP address. The second image contains the victim machine’s name. 
+
+Victim details:  
+Date and Time: 09-22-2015 Between 22:41 and 22:57 UTC  
+Victim IP address: 10.54.112.205  
+Victim MAC address: 00:50:8b:01:2f (Hewlett Packard)  
+Victim Host Name: Pendjiek-PC  
+Victim Operating System: Windows  
+
+<img width="800" height="495" alt="dhcp search" src="https://github.com/user-attachments/assets/fe289969-d5e9-4f3b-949a-488d6ccc8f5b" />
+
+<img width="561" height="239" alt="host name" src="https://github.com/user-attachments/assets/1873927c-fa44-4c0f-ae29-527fb1f5c54b" />
+
+We also discovered some suspcious domains here.
+
+<img width="800" height="130" alt="suspiciousdomain" src="https://github.com/user-attachments/assets/a0516a77-f81c-4757-a5b5-c301a4a7c844" />
 
 
+From there, not much else could be deciphered from the PCAP files. Using hybrid-analysis.com, I used the IP search feature. The search gave me a list of all the times that IP address has been reported. One of the items on the list had the same date, September 22, 2015 as the provided PCAP files. Also take note that AV Detection found the executable file RFQ_GMBH.exe to be a lokibot malware. 
 
+<img width="1083" height="273" alt="matchingdate" src="https://github.com/user-attachments/assets/91f649c6-b2b8-4c82-be05-2e75d4911239" />
 
+Upon further inspection, the report on hybrid-analysis also had the same suspicious domains that were in the provided PCAP files. 
 
+<img width="800" height="170" alt="matchingwebsites" src="https://github.com/user-attachments/assets/12646f5a-c088-42c1-a8df-d1f9c1d4ea03" />
 
+With the information above, we can all but assume that we have found the source of the malware on the infected machine. 
 
+---
 
+### Erik's Coffee Shop
 
+A local coffee shop has been compromised. They have tasked us with identifying the two user hosts and then identifying which machine got infected. Lastly, what is the type of malware and where did it come from.
 
+This task was split into two separate tasks. The first task being identifying the two host clients, and then figuring out which host was infected. The second part of the assignment was then to figure out what kind of malware was installed. After some investigation the machines seem to be sharing a local network. Kerberos is a common protocol between machines sharing a local network. Using kerberos as a filter in wireshark we were able to gain valuable information about the machines in use.
 
+<img width="825" height="838" alt="kerberossearch" src="https://github.com/user-attachments/assets/ac96247b-e20f-4bfc-a1e3-f0b17b3c6d43" />
+
+Machine Details:
+Host 1:10.0.0.149 - DESKTOP-C10SKPY - alyssa.fitzgerald  
+Host 2: 10.0.0.167 - DESKTOP-GRIONXA - elmer.obrien (infected machine)  
+
+We now have the two machines that could potentially be infected. Our next task is to find the malicious file. In wireshark, using the filter “this program” can sometimes be used in finding an executable file. Luckily enough, we got a hit. The destination IP address is 10.0.0.167. Make note of if this is indeed the malicious file so we know which machine got infected. 
+
+<img width="800" height="135" alt="thisprogramsearch" src="https://github.com/user-attachments/assets/e1b3a6a6-ba9b-4baf-ba02-317d80bcd14d" />
+
+Following the TCP stream gives us this information. We now have the Host name “alphapioneer.com”. The content type is labeled as image/png while it is clearly an executable file. The “MZ” being a give away, as well as the “this program cannot be run in DOS”. This is why the “this program” filter in wireshark can be useful.
+
+<img width="800" height="600" alt="notpng" src="https://github.com/user-attachments/assets/05175b60-43db-45ca-8f38-71156535bae8" />
+
+Exporting the HTTP file and uploading it to virustotal.com reveals that it is a qbot malware. A type of malware commonly used in phishing attacks that steals banking information and other credentials.
