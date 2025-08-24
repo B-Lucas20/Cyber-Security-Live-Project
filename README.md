@@ -33,6 +33,8 @@ For the offensive Stories I was tasked with exposing several different vulnerabi
 - [Erik's Coffee Shop](#eriks-coffee-shop)
 
 ---
+- Jump to: [Introduction](#introduction), [Offensive Stories](#logging-in-as-admin-and-a-user), [Defensive Stories](#malware-traffic), [Learning and Challenges](#learning-and-challenges)
+--- 
 
 ### Logging in as Admin and a User
 
@@ -160,7 +162,7 @@ We also discovered some suspcious domains here.
 
 From there, not much else could be deciphered from the PCAP files. Using hybrid-analysis.com, I used the IP search feature. The search gave me a list of all the times that IP address has been reported. One of the items on the list had the same date, September 22, 2015 as the provided PCAP files. Also take note that AV Detection found the executable file RFQ_GMBH.exe to be a lokibot malware. 
 
-<img width="1083" height="273" alt="matchingdate" src="https://github.com/user-attachments/assets/91f649c6-b2b8-4c82-be05-2e75d4911239" />
+<img width="800" height="255" alt="matchingdate" src="https://github.com/user-attachments/assets/91f649c6-b2b8-4c82-be05-2e75d4911239" />
 
 Upon further inspection, the report on hybrid-analysis also had the same suspicious domains that were in the provided PCAP files. 
 
@@ -176,10 +178,10 @@ A local coffee shop has been compromised. They have tasked us with identifying t
 
 This task was split into two separate tasks. The first task being identifying the two host clients, and then figuring out which host was infected. The second part of the assignment was then to figure out what kind of malware was installed. After some investigation the machines seem to be sharing a local network. Kerberos is a common protocol between machines sharing a local network. Using kerberos as a filter in wireshark we were able to gain valuable information about the machines in use.
 
-<img width="825" height="838" alt="kerberossearch" src="https://github.com/user-attachments/assets/ac96247b-e20f-4bfc-a1e3-f0b17b3c6d43" />
+<img width="800" height="830" alt="kerberossearch" src="https://github.com/user-attachments/assets/ac96247b-e20f-4bfc-a1e3-f0b17b3c6d43" />
 
-Machine Details:
-Host 1:10.0.0.149 - DESKTOP-C10SKPY - alyssa.fitzgerald  
+Machine Details:  
+Host 1: 10.0.0.149 - DESKTOP-C10SKPY - alyssa.fitzgerald  
 Host 2: 10.0.0.167 - DESKTOP-GRIONXA - elmer.obrien (infected machine)  
 
 We now have the two machines that could potentially be infected. Our next task is to find the malicious file. In wireshark, using the filter “this program” can sometimes be used in finding an executable file. Luckily enough, we got a hit. The destination IP address is 10.0.0.167. Make note of if this is indeed the malicious file so we know which machine got infected. 
@@ -191,3 +193,18 @@ Following the TCP stream gives us this information. We now have the Host name �
 <img width="800" height="600" alt="notpng" src="https://github.com/user-attachments/assets/05175b60-43db-45ca-8f38-71156535bae8" />
 
 Exporting the HTTP file and uploading it to virustotal.com reveals that it is a qbot malware. A type of malware commonly used in phishing attacks that steals banking information and other credentials.
+
+---
+
+## Learning and Challenges
+
+- Team Environment: Learned how to share and articulate problems and roadblocks. Collaboration in problem solving. 
+- Setting up Kali Linux: I learned how to set up a virtual machine on my own personal computer. Using VirtualBox I was able to install Kali Linux. From there, I learned how to set up a Docker Image in the virtual machine so I can spin up the OWASP's Juice Shop to conduct my penetration testing stories. This helped me gain a small amount of comfort with the Linux command line.
+- Burp Suite: For all the offensive stories mentioned above, I used the Burp Suite Community edition. Even then, it is an incredibly powerful tool for conducting penetration testing. I learned how to use key tools within burp suite such as the repeater and the intruder.
+- Wireshark: Configuring Wireshark and customizing columns. Learning different "trick" filters to help decifer and find clues. 
+- How to Google: I googled way more on this live project than anticipated. Particularly in the defensive portion of the stories. I googled IP address, suspicious websites, and what different types of malware do. 
+
+---
+- Jump to: [Introduction](#introduction), [Offensive Stories](#logging-in-as-admin-and-a-user), [Defensive Stories](#malware-traffic), [Learning and Challenges](#learning-and-challenges)
+---
+
